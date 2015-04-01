@@ -1,6 +1,5 @@
 /conf/*.php
 /deploy/*.conf
-/test
 /node_modules
 /var
 *.log
