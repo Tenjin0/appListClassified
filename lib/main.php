@@ -13,7 +13,7 @@
 
 abstract class Application
 {
-	abstract public function getInfos();
+	abstract public function getInfos($ipaPath, $rootPath);
 	protected static $extension; // string with ipa ou apk
 
 	protected $id;
@@ -57,15 +57,16 @@ abstract class Application
 
 	public function rrmdir($dir)
 	{
-	   if (is_dir($dir)) {
-	     $objects = scandir($dir);
-	     foreach ($objects as $object) {
-	       if ($object != "." && $object != "..") {
-	         if (filetype($dir."/".$object) == "dir") rrmdir($dir."/".$object); else unlink($dir."/".$object);
-	       }
-	     }
-	     reset($objects);
-	     rmdir($dir);
+		if (is_dir($dir)) {
+			$objects = scandir($dir);
+			foreach ($objects as $object) {
+				if ($object != "." && $object != "..") {
+					if (filetype($dir."/".$object) == "dir") rrmdir($dir."/".$object); else unlink($dir."/".$object);
+	       		}
+	     	}
+	     	reset($objects);
+	     	rmdir($dir);
+		}
 	}
 
 }
@@ -73,7 +74,7 @@ abstract class Application
 
 class IosApp extends Application
 {
-	$extension = 'ipa';
+	protected static $extension = 'ipa';
 
 	public function getInfos($ipaPath, $rootPath=null) // old getApplicationInfo
 	{
@@ -112,7 +113,7 @@ class IosApp extends Application
 
 class AndroidApp extends Application
 {
-	$extension = 'apk';
+	protected static $extension = 'apk';
 
 	public function getInfos($apkPath, $rootPath=null) // old getApkinfo
 		{
@@ -141,7 +142,7 @@ class Sort // DONE
 	private $a;
 	private $b;
 
-	static function Sort($a='', $b='')
+	function Sort($a='', $b='')
 	{
 		$this->a = $a;
 		$this->b = $b;
@@ -258,12 +259,12 @@ class AppList
 			// $temp = getApkinfo($appPath, $dir);
 			// $indice = checkAppAlreadyInList($result, $temp);
 
-			var $app;
+			// var $app;
 
-			if laClasseAppelantEstIosApp then -----
-				$app = new IosApp();
-			else
-				$app = new AndroidApps();
+			// if laClasseAppelantEstIosApp then -----
+			// 	$app = new IosApp();
+			// else
+			// 	$app = new AndroidApps();
 
 
 			$temp = $app->getInfos($appPath, $dir);
