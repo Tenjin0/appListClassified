@@ -1,0 +1,55 @@
+TRI
+	sortApps
+	sortAppsByName
+	sortVersions
+
+PATH
+	joinPath
+	getRelativePath
+	getCurrentUrl
+		-> getCurrentServerAddress
+	getCurrentUrlFolder
+
+
+APP (classe mere)
+
+	rrmdir
+	findAndroidAppPaths && findIosAppPaths -> factorisable en utilisant un attribut de classe (ios ou apk)
+
+	findIosApps && findAndroidApps -> factorisable
+
+	->IOS (fille)
+		getApplicationInfo // a renomer
+
+
+	->Android (fille)
+		getApkinfo
+
+
+LIST APP
+	checkAppAlreadyInList
+
+
+
+
+
+
+
+
+
+SYSTEM
+	sendNotFound // a deplacer
+
+
+
+
+Functions actuelles :
+
+
+
+
+
+
+
+
+

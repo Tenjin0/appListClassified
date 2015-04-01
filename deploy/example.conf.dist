@@ -1,0 +1,4 @@
+
+export HOST=""
+export USERNAME=""
+export TARGET_PATH=""

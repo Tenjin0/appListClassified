@@ -1,0 +1,9 @@
+/conf/*.php
+/deploy/*.conf
+/test
+/node_modules
+/var
+*.log
+/images
+/www/*.log
+/www/*.html

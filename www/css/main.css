@@ -1,0 +1,109 @@
+
+body {
+	padding-top: 50px;
+	background-color: #999;
+	font-family: sans-serif;
+}
+
+.oldVersions.app-entry .pull-right{
+	padding-top: -10px;
+}
+
+.list-group {
+	font-size: 2em;
+}
+
+.navbar-brand{
+	cursor: default;
+}
+
+.navbar-brand:hover {
+	color: inherit;
+}
+
+.app-entry .versionTxt {
+	color: #bbb;
+	font-size: 0.8em;
+}
+
+.app-entry .versionTxtOld {
+	color: #ccc;
+	font-size: 0.8em;
+}
+
+.accordion-toggle:after {
+	display: inline-block;
+
+	padding: 27px 20px 0px 0px;
+	margin: -10px 0;
+
+	/* symbol for "opened" panels */
+	font-family: 'FontAwesome';  /* essential for enabling glyphicon */
+	content: "\f147";    /* "+", adjust as needed, taken from bootstrap.css */
+	float: left;        /* adjust as needed */
+	color: grey;         /* adjust as needed */
+	margin-right: 10px;
+
+	width: 60px;
+	text-align: center;
+
+	cursor: pointer;
+}
+
+
+.accordion-toggle.collapsed:after {
+	/* symbol for "collapsed" panels */
+	content: "\f196";    /* "-", adjust as needed, taken from bootstrap.css */
+}
+
+
+.panel-body .oldVersions {
+	margin: 10px 0 10px 50px;
+}
+
+
+.fa-download {
+	padding-top: 15px;
+	font-size: 1.8em;
+}
+
+.panel-body .oldDownloads.fa-download {
+	padding-top: inherit;
+	margin-right: 100px;
+}
+
+.panel-body .container .default {
+	list-style-type: none;
+}
+
+
+.fa-refresh {
+	font-size: 1.8em;
+}
+
+.fa.fa-android{
+	font-size: 1.5em;
+}
+
+.fa.fa-apple{
+	font-size: 1.5em;
+}
+
+.appIcon{
+	height: 72px;
+	width: 72px;
+}
+
+.wrapper{
+	display: inline-block;
+
+	height: 72px;
+	width: 72px;
+
+	-webkit-clip-path: inset(0 0 0 0 round 20%);
+	clip-path: inset(0 0 0 0 round 20%);
+
+	background-image: url('../images/missing.png');
+
+	vertical-align: middle;
+}

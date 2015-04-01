@@ -1,0 +1,12 @@
+/tmp/
+/test/
+/deploy/
+/conf/*.php
+/node_modules/
+.git/
+.gitignore
+.DS_Store
+*.mwb
+*.bak
+*.log
+ga.js

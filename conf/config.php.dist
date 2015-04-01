@@ -1,0 +1,10 @@
+<?php
+
+# IMPORTANT :
+# appFolder = Use an absolute path
+# imageFolder = Where to store icons extracted from applications, use an absolute path
+
+$config = array(
+	"appFolder" => "",
+	"imageFolder" => "",
+);
