@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__.'/../lib/mainClasse.php';
+require __DIR__.'/../lib/main.php';
 
-Paths::join();
-$ios = new IosApp('','','','');
+Path::join();
+$ios = new IosApp();
