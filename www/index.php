@@ -3,11 +3,14 @@
 	require __DIR__.'/../conf/config.php';
 	require __DIR__.'/../lib/main.php';
 	require __DIR__.'/../lib/autoload.php';
-
+	$currentUrlFolder = Path::getCurrentUrlFolder();
 	$rootFolder = $config['appFolder'];
 
-	$iosApps = findIosApps($rootFolder);
-	$androidApps = findAndroidApps($rootFolder);
+	// A OPTI PLUS TARD
+	$iosApps = new AppList('ipa');
+	$iosApps->find($rootFolder);
+	$androidApps = new AppList('apk');
+	$androidApps->find($rootFolder);
 	$numberDisplayedVersions = 9; //how many old versions to display
 	if (!$iosApps || !$androidApps) {
 		echo "Could not list files in folder: ".$rootFolder;
@@ -89,12 +92,12 @@
 
 		<div class="tab-content">
 			<div id="iOS" class="tab-pane active" role="tabpanel" >
-				<?php if (!empty($iosApps)): ?>
+				<?php if (!empty($iosApps->getApps())): ?>
 					<ul class="list-group">
 
 <!-- iOS - Derniere version disponible -->
 
-						<?php foreach ($iosApps as $app): ?>
+						<?php foreach ($iosApps->getApps() as $app): ?>
 						<?php $friendlyId = 'ipa_'.preg_replace('/\./', '_', $app['id']) ?>
 							<li class="list-group-item app-entry">
 								<div class="container">
@@ -103,12 +106,12 @@
 									<!--icone de l appli-->
 
 									<div class="wrapper">
-										<img  class='appIcon' src="<?= getCurrentUrlFolder().'display.php?path='.$app['name'] ?>" onerror="hide(this)"></img>
+										<img  class='appIcon' src="<?= $currentUrlFolder.'display.php?path='.$app['name'] ?>" onerror="hide(this)"></img>
 									</div>
 
 									<!--nom de l appli-->
 									<span class="name"><?= $app['name'] ?></span> <span class="versionTxt">v<?= array_keys($app['versions'])[0] ?></span>
-									<a class="pull-right" href="itms-services://?action=download-manifest&amp;url=<?= urlencode(getCurrentUrlFolder().'plist.php?path='.$app['versions'][array_keys($app['versions'])[0]]) ?>"><span class="fa fa-download"></span></a>
+									<a class="pull-right" href="itms-services://?action=download-manifest&amp;url=<?= urlencode($currentUrlFolder.'plist.php?path='.$app['versions'][array_keys($app['versions'])[0]]) ?>"><span class="fa fa-download"></span></a>
 								</div>
 							</li>
 
@@ -135,7 +138,7 @@
 													<div class="container">
 														<li class="oldVersions app-entry">
 										        			<span class="name"><?= $app['name'] ?> </span> <span class="versionTxtOld">v<?= $key ?></span>
-										        			<a class="pull-right" href="itms-services://?action=download-manifest&amp;url=<?= urlencode(getCurrentUrlFolder().'plist.php?path='.$value) ?>">
+										        			<a class="pull-right" href="itms-services://?action=download-manifest&amp;url=<?= urlencode($currentUrlFolder().'plist.php?path='.$value) ?>">
 										        			<span class="oldDownloads fa fa-download"></span></a>
 										        		</li>
 													</div>
@@ -162,7 +165,7 @@
 
 									<!--icone de l appli-->
 									<div class="wrapper">
-										<img class='appIcon' src="<?= getCurrentUrlFolder().'display.php?path='.$app['name'] ?>" onerror="hide(this)"></img>
+										<img class='appIcon' src="<?= $currentUrlFolder().'display.php?path='.$app['name'] ?>" onerror="hide(this)"></img>
 									</div>
 
 								<!--nom de l appli-->

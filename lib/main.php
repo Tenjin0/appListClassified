@@ -29,46 +29,13 @@ abstract class Application
 		$this->versions = $versions;
 	}
 
-	public function findPaths($dir) // old findIosAppPath et findAndroidAppPath
-	{
-		$path = new Path();
-
-		// $dir = joinPath($dir); # remove trailing slash, if any
-		$dir = $path->join($dir); # remove trailing slash, if any
-		$files = scandir($dir);
-		$files = array_diff(scandir($dir), array('..', '.')); #remove  . .. directory in the linux environment
-		$appPathList = [];
-
-		foreach ($files as $file) {
-			if (preg_match('/\.'.$extension.'$/i', $file)) // $extension represente la variable static $extension
-			{
-				$appPathList [] = "{$dir}/{$file}";
-			}
-			else if (is_dir("{$dir}/{$file}"))
-			{
-				$appPathList2  = $this->findPaths("{$dir}/{$file}"); // a remplacer
-				// $appPathList2  = findIosAppPaths("{$dir}/{$file}"); // a remplacer
-				$appPathList = array_merge($appPathList, $appPathList2);
-			}
-		}
-		return $appPathList;
+	public function getVersion(){
+		return $this->versions;
 	}
 
-
-	public function rrmdir($dir)
-	{
-		if (is_dir($dir)) {
-			$objects = scandir($dir);
-			foreach ($objects as $object) {
-				if ($object != "." && $object != "..") {
-					if (filetype($dir."/".$object) == "dir") rrmdir($dir."/".$object); else unlink($dir."/".$object);
-	       		}
-	     	}
-	     	reset($objects);
-	     	rmdir($dir);
-		}
+	public function setVersion($argVersions){
+		$this->versions = $argVersions;
 	}
-
 }
 
 
@@ -93,7 +60,7 @@ class IosApp extends Application
 				$path = $ipaPath;
 
 				if ($rootPath)
-					$path = getRelativePath($rootPath, $path);
+					$path = Path::getRelativePath($rootPath, $path);
 
 				return array(
 					'id' => (string)$config->attributes()['id'],
@@ -148,8 +115,24 @@ class Sort // DONE
 		$this->b = $b;
 	}
 
+	static function sortByName($array){
 
-	static function byName($a, $b) // old sortAppsByName
+		usort($array, 'byName');
+		return $array;
+	}
+
+	static function sortByVersions($array){
+
+		for( $i= 0 ; $i <sizeof($array)  ; $i++ ){
+			$appTemp =$array[$i]['versions'];
+			uksort($appTemp, 'byVersions');
+			$array[$i]['versions'] = $appTemp;
+		}
+		return $array;
+	}
+
+
+	private function byName($a, $b) // old sortAppsByName
 	{
 		$a['name'] = strtolower($a['name']);
 		$b['name'] = strtolower($b['name']);
@@ -162,7 +145,7 @@ class Sort // DONE
 	}
 
 
-	static function byVersions($a, $b) // sortVersions
+	private function byVersions($a, $b) // sortVersions
 	{
 		return  -1 * version_compare($a, $b); // multiply by -1 to reverse sort order
 	}
@@ -202,13 +185,13 @@ class Path // DONE
 
 	static function getCurrentUrlFolder()
 	{
-		return preg_replace('/[^\/]*(\?.*)?$/', '', getCurrentUrl());
+		return preg_replace('/[^\/]*(\?.*)?$/', '', Path::getCurrentUrl());
 	}
 
 
 	private function getCurrentUrl()
 	{
-		return getCurrentServerAddress().$_SERVER['REQUEST_URI'];
+		return Path::getCurrentServerAddress().$_SERVER['REQUEST_URI'];
 	}
 
 
@@ -226,6 +209,13 @@ class Path // DONE
 
 class AppList
 {
+	private $extension;
+	private $apps = array();
+
+	public function AppList($ext){
+
+		$this->extension = $ext;
+	}
 	public function check($appList, $appToTest) // old checkAppAlreadyInList ... check if App is Already In the List
 	{
 		foreach ($appList as $key=>$app){
@@ -235,17 +225,42 @@ class AppList
 		}
 		return -1;
 	}
-
-
-
-	public function find() // A FINIR fusion de findAndroidApps et findIosApps
+	public function getApps(){
+		return $this->apps;
+	}
+	public function findPaths($dir) // old findIosAppPath et findAndroidAppPath
 	{
-		$path = new Path();
-		$dir = $path->join($dir); # remove trailing slash, if any
+
+
+		// $dir = joinPath($dir); # remove trailing slash, if any
+		$dir = Path::join($dir); # remove trailing slash, if any
+		$files = scandir($dir);
+		$files = array_diff(scandir($dir), array('..', '.')); #remove  . .. directory in the linux environment
+		$appPathList = [];
+
+		foreach ($files as $file) {
+			if (preg_match('/\.'.$this->extension.'$/i', $file)) // $extension represente la variable static $extension
+			{
+				$appPathList [] = "{$dir}/{$file}";
+			}
+			else if (is_dir("{$dir}/{$file}"))
+			{
+				$appPathList2  = $this->findPaths("{$dir}/{$file}"); // a remplacer
+				// $appPathList2  = findIosAppPaths("{$dir}/{$file}"); // a remplacer
+				$appPathList = array_merge($appPathList, $appPathList2);
+			}
+		}
+		return $appPathList;
+	}
+
+	public function find($dir) // A FINIR fusion de findAndroidApps et findIosApps
+	{
+		// $path = new Path();
+		$dirResult = Path::join($dir); # remove trailing slash, if any
 		// $dir = joinPath($dir); # remove trailing slash, if any
 
-		$files = scandir($dir);
-
+		$files = scandir($dirResult);
+		echo 'je passe par la ';
 		$result = array();
 		global $appFolder;
 		global $imgFolder;
@@ -261,14 +276,17 @@ class AppList
 
 			// var $app;
 
-			// if laClasseAppelantEstIosApp then -----
-			// 	$app = new IosApp();
-			// else
-			// 	$app = new AndroidApps();
+			if ($this->extension == 'ipa'){
+				$app = new IosApp();
+
+
+			}
+			else if ($this->extension == 'apk'){
+				$app = new AndroidApps();
+			}
 
 
 			$temp = $app->getInfos($appPath, $dir);
-
 
 			$indice = $this->check($result, $temp);
 			// $indice = checkAppAlreadyInList($result, $temp);
@@ -277,44 +295,161 @@ class AppList
 				$result [] = $temp;
 
 		    } else {
-		    	$versions = array_merge($result[$indice]['versions'], $temp['versions']);
-		    	$result[$indice]['versions'] = $versions;
+		    	print_r($result);
+
+		    	$apptemp = $result[$indice];
+		    	$versions = array_merge($apptemp->getVersion(), $temp['versions']);
+		    	// $result[$indice]['versions'] = $versions;
+		    	$apptemp->setVersion($versions);
 		    }
 		}
-
-		usort($result, 'sortAppsByName');
-
-		for( $i= 0 ; $i <sizeof($result)  ; $i++ ){
-			$appTemp =$result[$i]['versions'];
-			uksort($appTemp, 'sortVersions');
-			$result[$i]['versions'] = $appTemp;
-		}
+		$result = Sort::sortByName($result);
+		// usort($result, Sort::byName());
+		$result = Sort::sortByVersions($result);
 
 			// Trouver l icone dans le fichier
 
 		foreach ($result as $app) {
-
 			$appName = $app['name'];
-			$iconPath = 'res/drawable/icon.png';
+			if ($this->extension == 'ipa'){
+				$iconPath = 'Payload/'.$appName.'.app/icon-72.png';
+			}
+			else if ($this->extension == 'apk'){
+				$iconPath = 'res/drawable/icon.png';
+			}
 
 			$za = new ZipArchive();
 			$za->open($appFolder.$app['versions'][array_keys($app['versions'])[0]]);
-			$za->extractTo(joinPath($imgFolder,'tmp'), $iconPath);
+			$za->extractTo(Path::join($imgFolder,'tmp'), $iconPath);
 			$za->close();
 
-			if (!file_exists(joinPath($iconFolder,$appName))) {
+			if (!file_exists(Path::join($iconFolder,$appName))) {
 				mkdir(joinPath($iconFolder,$appName), 0755, true);
 			}
 
-			if (file_exists(joinPath($imgFolder,'tmp/',$iconPath))) {
-				copy(joinPath($imgFolder,'tmp/',$iconPath), joinPath($iconFolder,$appName,'/icon.png'));
+			if (file_exists(jPath::join($imgFolder,'tmp/',$iconPath))) {
+				copy(Path::join($imgFolder,'tmp/',$iconPath), Path::join($iconFolder,$appName,'/icon.png'));
 			}
 
 			if (file_exists($iconFolder.$appName)) {
-				rrmdir(joinPath($imgFolder,'tmp/res/'));
+				rrmdir(Path::join($imgFolder,'tmp/res/'));
 			}
 		}
+		$this->apps = $result;
+	}
 
-		return $result;
+	public function rrmdir($dir)
+	{
+		if (is_dir($dir)) {
+			$objects = scandir($dir);
+			foreach ($objects as $object) {
+				if ($object != "." && $object != "..") {
+					if (filetype($dir."/".$object) == "dir") rrmdir($dir."/".$object); else unlink($dir."/".$object);
+	       		}
+	     	}
+	     	reset($objects);
+	     	rmdir($dir);
+		}
+	}
+}
+
+class Web {
+
+	public static function sendNotFound() {
+		header('HTTP/1.0 404 Not Found');
+		echo "Not Found";
+		exit();
+	}
+
+
+	public static function setContentType($contentType) {
+		header("Content-type: {$contentType}");
+	}
+
+	// NOT USED YET //
+	public static function getBrowser(){ // fonction avancée
+
+		$u_agent = $_SERVER['HTTP_USER_AGENT'];
+	    $bname = 'Unknown';
+	    $platform = 'Unknown';
+	    $version= "";
+
+	    //First get the platform?
+	    if (preg_match('/linux/i', $u_agent)) {
+	        $platform = 'linux';
+	    }
+	    elseif (preg_match('/macintosh|mac os x/i', $u_agent)) {
+	        $platform = 'mac';
+	    }
+	    elseif (preg_match('/windows|win32/i', $u_agent)) {
+	        $platform = 'windows';
+	    }
+
+	    // Next get the name of the useragent yes seperately and for good reason
+	    if(preg_match('/MSIE/i',$u_agent) && !preg_match('/Opera/i',$u_agent))
+	    {
+	        $bname = 'Internet Explorer';
+	        $ub = "MSIE";
+	    }
+	    elseif(preg_match('/Firefox/i',$u_agent))
+	    {
+	        $bname = 'Mozilla Firefox';
+	        $ub = "Firefox";
+	    }
+	    elseif(preg_match('/Chrome/i',$u_agent))
+	    {
+	        $bname = 'Google Chrome';
+	        $ub = "Chrome";
+	    }
+	    elseif(preg_match('/Safari/i',$u_agent))
+	    {
+	        $bname = 'Apple Safari';
+	        $ub = "Safari";
+	    }
+	    elseif(preg_match('/Opera/i',$u_agent))
+	    {
+	        $bname = 'Opera';
+	        $ub = "Opera";
+	    }
+	    elseif(preg_match('/Netscape/i',$u_agent))
+	    {
+	        $bname = 'Netscape';
+	        $ub = "Netscape";
+	    }
+
+	    // finally get the correct version number
+	    $known = array('Version', $ub, 'other');
+	    $pattern = '#(?<browser>' . join('|', $known) .
+	    ')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#';
+	    if (!preg_match_all($pattern, $u_agent, $matches)) {
+	        // we have no matching number just continue
+	    }
+
+	    // see how many we have
+	    $i = count($matches['browser']);
+	    if ($i != 1) {
+	        //we will have two since we are not using 'other' argument yet
+	        //see if version is before or after the name
+	        if (strripos($u_agent,"Version") < strripos($u_agent,$ub)){
+	            $version= $matches['version'][0];
+	        }
+	        else {
+	            $version= $matches['version'][1];
+	        }
+	    }
+	    else {
+	        $version= $matches['version'][0];
+	    }
+
+	    // check if we have a number
+	    if ($version==null || $version=="") {$version="?";}
+
+	    return array(
+	        'userAgent' => $u_agent,
+	        'name'      => $bname,
+	        'version'   => $version,
+	        'platform'  => $platform,
+	        'pattern'    => $pattern
+	    );
 	}
 }

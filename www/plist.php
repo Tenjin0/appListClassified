@@ -7,17 +7,17 @@
 	define('PATH_PARM', 'path');
 
 	if (!array_key_exists(PATH_PARM, $_GET) || !$_GET[PATH_PARM])
-		sendNotFound();
+		Web::sendNotFound();
 
 	$appPath = $_GET[PATH_PARM];
 	$appFullPath = "{$rootFolder}/{$appPath}";
 
 	if (!file_exists($appFullPath))
-		sendNotFound();
+		Web::sendNotFound();
 
 	$app = getApplicationInfo($appFullPath, $rootFolder);
 
-	$currentUrlFolder = getCurrentUrlFolder();
+	$currentUrlFolder = Path::getCurrentUrlFolder();
 
 	$id = $app['id'];
 
