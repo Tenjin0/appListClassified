@@ -32,20 +32,25 @@ abstract class Application
 
 	public function findPaths($dir) // old findIosAppPath et findAndroidAppPath
 	{
-		$path = new Paths();
-		$dir = joinPath($dir); # remove trailing slash, if any
+		$path = new Path();
+
+		// $dir = joinPath($dir); # remove trailing slash, if any
+		$dir = $path->join($dir); # remove trailing slash, if any
 		$files = scandir($dir);
 		$files = array_diff(scandir($dir), array('..', '.')); #remove  . .. directory in the linux environment
 		$appPathList = [];
 
 		foreach ($files as $file) {
-			if (preg_match('/\.'.$extension$.'/i', $file)) // $extension represente la variable static $extension
+			if (preg_match('/\.'.$extension.'$/i', $file)) // $extension represente la variable static $extension
 			{
 				$appPathList [] = "{$dir}/{$file}";
 			}
 			else if (is_dir("{$dir}/{$file}"))
 			{
-				$appPathList2  = findIosAppPaths("{$dir}/{$file}");
+				$iosApp = new IosApp();
+
+
+				$appPathList2  = findIosAppPaths("{$dir}/{$file}"); // a remplacer
 				$appPathList = array_merge($appPathList, $appPathList2);
 			}
 		}
@@ -56,8 +61,9 @@ abstract class Application
 	public function findApps() // fusion de findAndroidApps et findIosApps
 	{
 		$dir = joinPath($dir); # remove trailing slash, if any
-		$result = array();
 		$files = scandir($dir);
+
+		$result = array();
 		global $appFolder;
 		global $imgFolder;
 		global $iconFolder;
@@ -137,8 +143,9 @@ abstract class Application
 }
 
 
-class Ios extends Application
+class IosApp extends Application
 {
+	$extension = 'ipa';
 
 	function getInfos($ipaPath, $rootPath=null) // old getApplicationInfo
 	{
@@ -175,8 +182,9 @@ class Ios extends Application
 
 }
 
-class Android extends Application
+class AndroidApp extends Application
 {
+	$extension = 'apk';
 
 	function getInfos($apkPath, $rootPath=null) // old getApkinfo
 		{
