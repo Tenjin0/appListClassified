@@ -1,9 +1,5 @@
 <?php
 
-// TODO :
-// 			- verifier les instanciations
-// 			- verifier les appels de functions (certaines on ete renommer)
-
 
 	require __DIR__.'/../conf/config.php';
 
@@ -59,17 +55,14 @@ class IosApp extends Application
 
 				$path = $ipaPath;
 
-				if ($rootPath)
+				if ($rootPath){
 					$path = Path::getRelativePath($rootPath, $path);
+				}
 
-				return array(
-					'id' => (string)$config->attributes()['id'],
-					'name' => (string)$config->name,
-					'description' => (string)$config->description,
-					'versions' => [
-						(string)$config->attributes()['version'] => $path
-					],
-				);
+				$this->id = (string)$config->attributes()['id'];
+				$this->name = (string)$config->name;
+				$this->description = (string)$config->description;
+				$this->versions = [(string)$config->attributes()['version']] => $path;
 			}
 		}
 
@@ -90,15 +83,12 @@ class AndroidApp extends Application
 			$path = $apkPath;
 
 			if ($rootPath)
-				$path = getRelativePath($rootPath, $path);
+				$path = Path::getRelativePath($rootPath, $path);
 
-			return [
-				'id' => $manifest->getPackageName(),
-				'name' => $manifest->getApplication()->getActivityNameList()[0],
-				'description' => "",
-				'versions' => [
-						$manifest->getVersionName() => $path ]
-				];
+			$this->id = $manifest->getPackageName();
+			$this->name = $manifest->getApplication()->getActivityNameList()[0];
+			$this->description = "";
+			$this->versions = [$manifest->getVersionName() => $path ];
 		}
 
 }
@@ -115,40 +105,52 @@ class Sort // DONE
 		$this->b = $b;
 	}
 
-	static function sortByName($array){
+	static function sortByName($array)
+	{
+		usort($array, function ($a, $b)
+		{
+			$a['name'] = strtolower($a['name']);
+			$b['name'] = strtolower($b['name']);
 
-		usort($array, 'byName');
-		return $array;
+			if ($a['name'] == $b['name'])
+			{
+					return 0;
+			}
+
+			return ($a['name'] < $b['name']) ? -1 : 1;
+		});
 	}
 
 	static function sortByVersions($array){
 
 		for( $i= 0 ; $i <sizeof($array)  ; $i++ ){
 			$appTemp =$array[$i]['versions'];
-			uksort($appTemp, 'byVersions');
+			uksort($appTemp, function ($a, $b)
+			{
+				return  -1 * version_compare($a, $b); // multiply by -1 to reverse sort order
+			});
 			$array[$i]['versions'] = $appTemp;
 		}
-		return $array;
 	}
 
 
-	private function byName($a, $b) // old sortAppsByName
-	{
-		$a['name'] = strtolower($a['name']);
-		$b['name'] = strtolower($b['name']);
+	// private static function byName($a, $b) // old sortAppsByName
+	// {
+	// 	$a['name'] = strtolower($a['name']);
+	// 	$b['name'] = strtolower($b['name']);
 
-		if ($a['name'] == $b['name']) {
-				return 0;
-		}
+	// 	if ($a['name'] == $b['name']) {
+	// 			return 0;
+	// 	}
 
-		return ($a['name'] < $b['name']) ? -1 : 1;
-	}
+	// 	return ($a['name'] < $b['name']) ? -1 : 1;
+	// }
 
 
-	private function byVersions($a, $b) // sortVersions
-	{
-		return  -1 * version_compare($a, $b); // multiply by -1 to reverse sort order
-	}
+	// private static function byVersions($a, $b) // sortVersions
+	// {
+	// 	return  -1 * version_compare($a, $b); // multiply by -1 to reverse sort order
+	// }
 
 }
 
@@ -189,13 +191,13 @@ class Path // DONE
 	}
 
 
-	private function getCurrentUrl()
+	private static function getCurrentUrl()
 	{
 		return Path::getCurrentServerAddress().$_SERVER['REQUEST_URI'];
 	}
 
 
-	private function getCurrentServerAddress()
+	private static function getCurrentServerAddress()
 	{
 		$protocol = "http";
 
@@ -260,7 +262,6 @@ class AppList
 		// $dir = joinPath($dir); # remove trailing slash, if any
 
 		$files = scandir($dirResult);
-		echo 'je passe par la ';
 		$result = array();
 		global $appFolder;
 		global $imgFolder;
@@ -303,9 +304,11 @@ class AppList
 		    	$apptemp->setVersion($versions);
 		    }
 		}
-		$result = Sort::sortByName($result);
+		Sort::sortByName($result);
+		// $result = Sort::sortByName($result);
 		// usort($result, Sort::byName());
-		$result = Sort::sortByVersions($result);
+		// $result = Sort::sortByVersions($result);
+		Sort::sortByVersions($result);
 
 			// Trouver l icone dans le fichier
 

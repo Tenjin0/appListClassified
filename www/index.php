@@ -9,6 +9,7 @@
 	// A OPTI PLUS TARD
 	$iosApps = new AppList('ipa');
 	$iosApps->find($rootFolder);
+	$iosAppList = $iosApps->getApps(); // a virer ou a remettre ligne 96
 	$androidApps = new AppList('apk');
 	$androidApps->find($rootFolder);
 	$numberDisplayedVersions = 9; //how many old versions to display
@@ -92,12 +93,12 @@
 
 		<div class="tab-content">
 			<div id="iOS" class="tab-pane active" role="tabpanel" >
-				<?php if (!empty($iosApps->getApps())): ?>
+				<?php if (!empty($iosApps)): ?>
 					<ul class="list-group">
 
 <!-- iOS - Derniere version disponible -->
 
-						<?php foreach ($iosApps->getApps() as $app): ?>
+						<?php foreach ($iosApps as $app): ?>
 						<?php $friendlyId = 'ipa_'.preg_replace('/\./', '_', $app['id']) ?>
 							<li class="list-group-item app-entry">
 								<div class="container">
@@ -154,11 +155,11 @@
 			<div id="android" class="tab-pane"  role="tabpanel" >
 				<?php if (!empty($androidApps)): ?>
 					<ul class="list-group">
-						<?php foreach ($androidApps as $app): ?>
-						<?php $friendlyId = 'apk_'.preg_replace('/\./', '_', $app['id']) ?>
 
 <!-- Android - Derniere version disponible -->
 
+						<?php foreach ($androidApps as $app): ?>
+						<?php $friendlyId = 'apk_'.preg_replace('/\./', '_', $app['id']) ?>
 							<li class="list-group-item app-entry">
 								<div class="container">
 									<span class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion" href="#<?= $friendlyId ?>"></span>
