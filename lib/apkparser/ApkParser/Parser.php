@@ -1,6 +1,12 @@
 <?php
 namespace ApkParser;
+require __DIR__.'/Archive.php';
+require __DIR__.'/Manifest.php';
+require __DIR__.'/XmlParser.php';
+require __DIR__.'/ResourcesParser.php';
+require __DIR__.'/Config.php';
 
+//echo 'Toto '.__DIR__;
 /**
  * This file is part of the Apk Parser package.
  *

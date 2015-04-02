@@ -1,5 +1,6 @@
 <?php
 namespace ApkParser;
+require __DIR__.'/Stream.php';
 
 /**
  * This file is part of the Apk Parser package.
@@ -48,7 +49,7 @@ class XmlParser
         if (!is_file($file))
             throw new \Exception("{$file} is not a regular file");
 
-        $parser = new \ApkParser\XmlParser(new \ApkParser\Stream(fopen($file, 'rd')));
+        $parser = new XmlParser(new Stream(fopen($file, 'rd')));
         //TODO : write a method in this class, ->saveToFile();
         file_put_contents($destination === NULL ? $file : $destination, $parser->getXmlString());
     }

@@ -1,6 +1,7 @@
 <?php
 namespace ApkParser;
-
+require __DIR__.'/Stream.php';
+require __DIR__.'/SeekableStream.php';
 /**
  * This file is part of the Apk Parser package.
  *
