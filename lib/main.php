@@ -1,11 +1,11 @@
 <?php
 
+namespace toto;
+require __DIR__.'/../conf/config.php';
 
-	require __DIR__.'/../conf/config.php';
-
-	$appFolder = $config['appFolder'];
-	$imgFolder = $config['imageFolder'];
-	$iconFolder = $imgFolder.'icons/';
+$appFolder = $config['appFolder'];
+$imgFolder = $config['imageFolder'];
+$iconFolder = $imgFolder.'icons/';
 
 abstract class Application
 {
@@ -31,6 +31,15 @@ abstract class Application
 
 	public function setVersion($argVersions){
 		$this->versions = $argVersions;
+	}
+
+	public function getId(){
+		return $this->id;
+	}
+
+	public function setId($argId){
+		$this->id = $argId;
+
 	}
 }
 
@@ -62,10 +71,10 @@ class IosApp extends Application
 				$this->id = (string)$config->attributes()['id'];
 				$this->name = (string)$config->name;
 				$this->description = (string)$config->description;
-				$this->versions = [(string)$config->attributes()['version']] => $path;
+				$this->versions = [(string)$config->attributes()['version'] => $path];
+				return $this;
 			}
 		}
-
 		return null;
 	}
 
@@ -89,6 +98,7 @@ class AndroidApp extends Application
 			$this->name = $manifest->getApplication()->getActivityNameList()[0];
 			$this->description = "";
 			$this->versions = [$manifest->getVersionName() => $path ];
+			return $this;
 		}
 
 }
@@ -220,9 +230,9 @@ class AppList
 	}
 	public function check($appList, $appToTest) // old checkAppAlreadyInList ... check if App is Already In the List
 	{
-		foreach ($appList as $key=>$app){
-			if (strcmp($app['id'],$appToTest['id']) == 0){
-				return $key;
+		foreach ($appList as $app){
+			if (strcmp($app->getId(),$appToTest->getId()) == 0){
+				return $app->getId();
 			}
 		}
 		return -1;
@@ -280,26 +290,26 @@ class AppList
 			if ($this->extension == 'ipa'){
 				$app = new IosApp();
 
-
 			}
 			else if ($this->extension == 'apk'){
-				$app = new AndroidApps();
+				$app = new AndroidApp();
 			}
 
 
-			$temp = $app->getInfos($appPath, $dir);
+			$app->getInfos($appPath, $dir);
+			$temp = $app;
+		    print_r($temp);
+			//get_object_vars($temp) ;
 
 			$indice = $this->check($result, $temp);
 			// $indice = checkAppAlreadyInList($result, $temp);
 
 			if ($indice == -1){
-				$result [] = $temp;
+				$results = $temp;
 
 		    } else {
-		    	// print_r($result);
-		    	print_r ($result[$indice]);
 		    	$apptemp = $result[$indice];
-		    	$versions = array_merge($apptemp->getVersion(), $temp['versions']);
+		    	$versions = array_merge($apptemp->getVersion(), $temp->getVersion());
 		    	// $result[$indice]['versions'] = $versions;
 		    	$apptemp->setVersion($versions);
 		    }

@@ -3,14 +3,18 @@
 	require __DIR__.'/../conf/config.php';
 	require __DIR__.'/../lib/main.php';
 	require __DIR__.'/../lib/autoload.php';
-	$currentUrlFolder = Path::getCurrentUrlFolder();
+	$currentUrlFolder = toto\Path::getCurrentUrlFolder();
 	$rootFolder = $config['appFolder'];
 
+	// echo $_SERVER['SERVER_NAME']."\n";
+	// echo $_SERVER['SERVER_PORT']."\n";
+	// echo $_SERVER['REQUEST_URI']."\n";
+
 	// A OPTI PLUS TARD
-	$iosApps = new AppList('ipa');
+	$iosApps = new toto\AppList('ipa');
 	$iosApps->find($rootFolder);
 	$iosAppList = $iosApps->getApps(); // a virer ou a remettre ligne 96
-	$androidApps = new AppList('apk');
+	$androidApps = new toto\AppList('apk');
 	$androidApps->find($rootFolder);
 	$numberDisplayedVersions = 9; //how many old versions to display
 	if (!$iosApps || !$androidApps) {
