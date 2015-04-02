@@ -295,8 +295,8 @@ class AppList
 				$result [] = $temp;
 
 		    } else {
-		    	print_r($result);
-
+		    	// print_r($result);
+		    	print_r ($result[$indice]);
 		    	$apptemp = $result[$indice];
 		    	$versions = array_merge($apptemp->getVersion(), $temp['versions']);
 		    	// $result[$indice]['versions'] = $versions;
