@@ -1,6 +1,6 @@
 <?php
 
-namespace toto;
+namespace application;
 require __DIR__.'/../conf/config.php';
 
 $appFolder = $config['appFolder'];
@@ -25,11 +25,18 @@ abstract class Application
 		$this->versions = $versions;
 	}
 
-	public function getVersion(){
+	public function getName(){
+		return $this->name;
+	}
+
+	public function setName($name){
+		$this->name = $name;
+	}
+	public function getVersions(){
 		return $this->versions;
 	}
 
-	public function setVersion($argVersions){
+	public function setVersions($argVersions){
 		$this->versions = $argVersions;
 	}
 
@@ -50,7 +57,7 @@ class IosApp extends Application
 
 	public function getInfos($ipaPath, $rootPath=null) // old getApplicationInfo
 	{
-		$za = new ZipArchive();
+		$za = new \ZipArchive();
 		$za->open($ipaPath);
 
 		for ($i=0; $i<$za->numFiles;$i++) {
@@ -60,7 +67,7 @@ class IosApp extends Application
 			if (preg_match('/^Payload\/(.*?)\.app\/config.xml$/i', $entryName)) {
 				$xmlPath = "zip://{$ipaPath}#{$entryName}";
 
-				$config = new SimpleXMLElement(file_get_contents($xmlPath));
+				$config = new \SimpleXMLElement(file_get_contents($xmlPath));
 
 				$path = $ipaPath;
 
@@ -72,6 +79,7 @@ class IosApp extends Application
 				$this->name = (string)$config->name;
 				$this->description = (string)$config->description;
 				$this->versions = [(string)$config->attributes()['version'] => $path];
+				// print_r($this);
 				return $this;
 			}
 		}
@@ -119,27 +127,27 @@ class Sort // DONE
 	{
 		usort($array, function ($a, $b)
 		{
-			$a['name'] = strtolower($a['name']);
-			$b['name'] = strtolower($b['name']);
+			$a->setName(strtolower($a->getName())) ;
+			$b->setName(strtolower($b->getName())) ;
 
-			if ($a['name'] == $b['name'])
+			if ($a->getName() == $b->getName())
 			{
 					return 0;
 			}
 
-			return ($a['name'] < $b['name']) ? -1 : 1;
+			return ($a->getName() < $b->getName()) ? -1 : 1;
 		});
 	}
 
 	static function sortByVersions($array){
 
 		for( $i= 0 ; $i <sizeof($array)  ; $i++ ){
-			$appTemp =$array[$i]['versions'];
-			uksort($appTemp, function ($a, $b)
+			$appsTemp =$array[$i]->getVersions();
+			uksort($appsTemp, function ($a, $b)
 			{
 				return  -1 * version_compare($a, $b); // multiply by -1 to reverse sort order
 			});
-			$array[$i]['versions'] = $appTemp;
+			$array[$i]->setversions($appsTemp) ;
 		}
 	}
 
@@ -167,7 +175,7 @@ class Sort // DONE
 
 class Path // DONE
 {
-	static function join() // old joinPath, as many arguments as needed
+	static  function join() // old joinPath, as many arguments as needed
 	{
 		$args = func_get_args();
 
@@ -181,8 +189,9 @@ class Path // DONE
 			$result .= preg_replace('/^\//', '', array_shift($args)); # Remove trailing slash
 		}
 
+		// http://stackoverflow.com/questions/11780551/php-call-user-func-with-class-and-arguments
 		if (!empty($args))
-			$result = call_user_func_array('joinPath', array_merge([$result],$args)); # recurse with remaining args.
+			$result = call_user_func_array(array('\application\Path','join'), array_merge([$result],$args)); # recurse with remaining args.
 
 		return $result;
 	}
@@ -222,23 +231,29 @@ class Path // DONE
 class AppList
 {
 	private $extension;
-	private $apps = array();
+	// private $apps = array();
 
-	public function AppList($ext){
+	public function __construct($ext){
 
 		$this->extension = $ext;
 	}
 	public function check($appList, $appToTest) // old checkAppAlreadyInList ... check if App is Already In the List
 	{
-		foreach ($appList as $app){
+		// print_r($appList);
+		// print_r($appToTest);
+		foreach ($appList as $key=>$app){
 			if (strcmp($app->getId(),$appToTest->getId()) == 0){
-				return $app->getId();
+				return $key;
 			}
 		}
 		return -1;
 	}
 	public function getApps(){
 		return $this->apps;
+	}
+	public function getExtension(){
+
+		return $this->extension;
 	}
 	public function findPaths($dir) // old findIosAppPath et findAndroidAppPath
 	{
@@ -251,6 +266,7 @@ class AppList
 		$appPathList = [];
 
 		foreach ($files as $file) {
+
 			if (preg_match('/\.'.$this->extension.'$/i', $file)) // $extension represente la variable static $extension
 			{
 				$appPathList [] = "{$dir}/{$file}";
@@ -298,22 +314,24 @@ class AppList
 
 			$app->getInfos($appPath, $dir);
 			$temp = $app;
-				print_r($temp);
 			//get_object_vars($temp) ;
 
 			$indice = $this->check($result, $temp);
 			// $indice = checkAppAlreadyInList($result, $temp);
 
 			if ($indice == -1){
-				$results = $temp;
+				array_push($result,$temp);
 
 				} else {
 					$apptemp = $result[$indice];
-					$versions = array_merge($apptemp->getVersion(), $temp->getVersion());
+					$versions = array_merge($apptemp->getVersions(), $temp->getVersions());
 					// $result[$indice]['versions'] = $versions;
-					$apptemp->setVersion($versions);
+					$apptemp->setVersions($versions);
 				}
 		}
+
+		// print_r($result);
+
 		Sort::sortByName($result);
 		// $result = Sort::sortByName($result);
 		// usort($result, Sort::byName());
@@ -323,7 +341,7 @@ class AppList
 			// Trouver l icone dans le fichier
 
 		foreach ($result as $app) {
-			$appName = $app['name'];
+			$appName = $app->getName();
 			if ($this->extension == 'ipa'){
 				$iconPath = 'Payload/'.$appName.'.app/icon-72.png';
 			}
@@ -331,23 +349,24 @@ class AppList
 				$iconPath = 'res/drawable/icon.png';
 			}
 
-			$za = new ZipArchive();
-			$za->open($appFolder.$app['versions'][array_keys($app['versions'])[0]]);
+			$za = new \ZipArchive();
+			$za->open($appFolder.$app->getVersions()[array_keys($app->getVersions())[0]]);
 			$za->extractTo(Path::join($imgFolder,'tmp'), $iconPath);
 			$za->close();
 
 			if (!file_exists(Path::join($iconFolder,$appName))) {
-				mkdir(joinPath($iconFolder,$appName), 0755, true);
+				mkdir(Path::join($iconFolder,$appName), 0755, true);
 			}
 
-			if (file_exists(jPath::join($imgFolder,'tmp/',$iconPath))) {
+			if (file_exists(Path::join($imgFolder,'tmp/',$iconPath))) {
 				copy(Path::join($imgFolder,'tmp/',$iconPath), Path::join($iconFolder,$appName,'/icon.png'));
 			}
 
 			if (file_exists($iconFolder.$appName)) {
-				rrmdir(Path::join($imgFolder,'tmp/res/'));
+				$this->rrmdir(Path::join($imgFolder,'tmp/res/'));
 			}
 		}
+		// print_r($result);
 		$this->apps = $result;
 	}
 
@@ -357,7 +376,7 @@ class AppList
 			$objects = scandir($dir);
 			foreach ($objects as $object) {
 				if ($object != "." && $object != "..") {
-					if (filetype($dir."/".$object) == "dir") rrmdir($dir."/".$object); else unlink($dir."/".$object);
+					if (filetype($dir."/".$object) == "dir") $this->rrmdir($dir."/".$object); else unlink($dir."/".$object);
 						}
 				}
 				reset($objects);

@@ -131,6 +131,7 @@
 										<div class="panel-body">
 												<ul>
 													<?php
+
 													if(count($app->getVersions()) < 2 )
 													{
 													?>
@@ -141,13 +142,12 @@
 													}
 													else{
 														?>
-														<?php foreach(array_slice($app->getVersions(),1,$numberDisplayedVersions) as $key => $value){
-														?>
+														<?php foreach(array_slice($app->getVersions(),1,$numberDisplayedVersions) as $key => $value){?>
 
 													<div class="container">
 														<li class="oldVersions app-entry">
 																	<span class="name"><?= $app->getId() ?> </span> <span class="versionTxtOld">v<?= $key ?></span>
-																	<a class="pull-right" href="itms-services://?action=download-manifest&amp;url=<?= urlencode($currentUrlFolder.'plist.php?path='.$value) ?>">
+																	<a class="pull-right" href="itms-services://?action=download-manifest&amp;url=<?= urlencode($currentUrlFolder().'plist.php?path='.$value) ?>">
 																	<span class="oldDownloads fa fa-download"></span></a>
 																</li>
 													</div>
@@ -174,7 +174,7 @@
 
 									<!--icone de l appli-->
 									<div class="wrapper">
-										<img class='appIcon' src="<?= $currentUrlFolder.'display.php?path='.$app->getId() ?>" onerror="hide(this)"></img>
+										<img class='appIcon' src="<?= $currentUrlFolder().'display.php?path='.$app->getId() ?>" onerror="hide(this)"></img>
 									</div>
 
 								<!--nom de l appli-->

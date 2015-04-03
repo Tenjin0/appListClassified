@@ -1,7 +1,5 @@
 <?php
 namespace ApkParser;
-require __DIR__.'/Xml.php';
-require __DIR__.'/XmlParser.php';
 
 /**
  * This file is part of the Apk Parser package.
