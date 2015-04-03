@@ -119,7 +119,7 @@
 									</div>
 
 									<!--nom de l appli-->
-									<span class="name"><?= $app->getId() ?></span> <span class="versionTxt">v<?= array_keys($app->getVersions())[0] ?></span>
+									<span class="name"><?= $app->getName() ?></span> <span class="versionTxt">v<?= array_keys($app->getVersions())[0] ?></span>
 									<a class="pull-right" href="itms-services://?action=download-manifest&amp;url=<?= urlencode($currentUrlFolder.'plist.php?path='.$app->getVersions()[array_keys($app->getVersions())[0]]) ?>"><span class="fa fa-download"></span></a>
 								</div>
 							</li>
@@ -146,7 +146,7 @@
 
 													<div class="container">
 														<li class="oldVersions app-entry">
-																	<span class="name"><?= $app->getId() ?> </span> <span class="versionTxtOld">v<?= $key ?></span>
+																	<span class="name"><?= $app->getName() ?> </span> <span class="versionTxtOld">v<?= $key ?></span>
 																	<a class="pull-right" href="itms-services://?action=download-manifest&amp;url=<?= urlencode($currentUrlFolder.'plist.php?path='.$value) ?>">
 																	<span class="oldDownloads fa fa-download"></span></a>
 																</li>
@@ -178,7 +178,7 @@
 									</div>
 
 								<!--nom de l appli-->
-									<span class="name"><?= $app->getId() ?></span> <span class="versionTxt">v<?= array_keys($app->getVersions())[0] ?></span>
+									<span class="name"><?= $app->getName() ?></span> <span class="versionTxt">v<?= array_keys($app->getVersions())[0] ?></span>
 									<a class="pull-right" href="download.php?path=<?=$app->getVersions()[array_keys($app->getVersions())[0]] ?>"><span class="fa fa-download"></span></a>
 
 								</div>
@@ -205,7 +205,7 @@
 														foreach(array_slice($app->getVersions(),1, $numberDisplayedVersions) as $key => $value)?>
 													<div class="container">
 														<li class="oldVersions app-entry">
-																	<span class=" name"><?= $app->getId() ?> </span> <span class="versionTxtOld">v<?= $key ?></span>
+																	<span class=" name"><?= $app->getName() ?> </span> <span class="versionTxtOld">v<?= $key ?></span>
 																	<a class="pull-right" href="download.php?path=<?=$value?>"><span class="oldDownloads fa fa-download"></span></a>
 																</li>
 													</div>
