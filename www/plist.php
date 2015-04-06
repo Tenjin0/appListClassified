@@ -19,12 +19,12 @@
 
 	$currentUrlFolder = Path::getCurrentUrlFolder();
 
-	$id = $app['id'];
+	$id = $app->getId();
 
-	$version = array_keys($app['versions'])[0];
+	$version = array_keys($app->getVersions())[0];
 
-	$description = $app['description'];
-	$name = $app['name'];
+	$description = $app->getDescription();
+	$name = $app->getName();
 
 	setContentType('text/xml');
 
