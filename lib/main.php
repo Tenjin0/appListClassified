@@ -237,6 +237,7 @@ class AppList
 
 		$this->extension = $ext;
 	}
+
 	public function check($appList, $appToTest) // old checkAppAlreadyInList ... check if App is Already In the List
 	{
 		// print_r($appList);
@@ -248,13 +249,16 @@ class AppList
 		}
 		return -1;
 	}
+
 	public function getApps(){
 		return $this->apps;
 	}
+
 	public function getExtension(){
 
 		return $this->extension;
 	}
+
 	public function findPaths($dir) // old findIosAppPath et findAndroidAppPath
 	{
 
