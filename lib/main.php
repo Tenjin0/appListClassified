@@ -9,7 +9,7 @@ $iconFolder = $imgFolder.'icons/';
 
 abstract class Application
 {
-	abstract public function getInfos($ipaPath, $rootPath);
+	abstract public function findInfos($ipaPath, $rootPath);
 	protected static $extension; // string with ipa ou apk
 
 	protected $id;
@@ -55,7 +55,7 @@ class IosApp extends Application
 {
 	protected static $extension = 'ipa';
 
-	public function getInfos($ipaPath, $rootPath=null) // old getApplicationInfo
+	public function findInfos($ipaPath, $rootPath=null) // old getApplicationInfo
 	{
 		$za = new \ZipArchive();
 		$za->open($ipaPath);
@@ -92,7 +92,7 @@ class AndroidApp extends Application
 {
 	protected static $extension = 'apk';
 
-	public function getInfos($apkPath, $rootPath=null) // old getApkinfo
+	public function findInfos($apkPath, $rootPath=null) // old getApkinfo
 		{
 			$apk = new \ApkParser\Parser($apkPath);
 			$manifest = $apk->getManifest();
@@ -285,7 +285,7 @@ class AppList
 		return $appPathList;
 	}
 
-	public function find($dir) // A FINIR fusion de findAndroidApps et findIosApps
+	public function findAllApps($dir) // A FINIR fusion de findAndroidApps et findIosApps
 	{
 		// $path = new Path();
 		$dirResult = Path::join($dir); # remove trailing slash, if any
@@ -316,7 +316,7 @@ class AppList
 			}
 
 
-			$app->getInfos($appPath, $dir);
+			$app->findInfos($appPath, $dir);
 			$temp = $app;
 			//get_object_vars($temp) ;
 

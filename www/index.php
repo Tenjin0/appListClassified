@@ -12,10 +12,10 @@
 
 	// A OPTI PLUS TARD
 	$iosApps = new application\AppList('ipa');
-	$iosApps->find($rootFolder);
+	$iosApps->findAllApps($rootFolder);
 
 	$androidApps = new application\AppList('apk');
-	$androidApps->find($rootFolder);
+	$androidApps->findAllApps($rootFolder);
 
 	$androidApps = $androidApps->getApps();
 	$iosApps = $iosApps->getApps(); // a virer ou a remettre ligne 96
