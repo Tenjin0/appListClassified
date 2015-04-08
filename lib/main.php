@@ -112,66 +112,6 @@ class AndroidApp extends Application
 }
 
 
-class Sort // DONE
-{
-	private $a;
-	private $b;
-
-	function Sort($a='', $b='')
-	{
-		$this->a = $a;
-		$this->b = $b;
-	}
-
-	static function sortByName($array)
-	{
-		usort($array, function ($a, $b)
-		{
-			$a->setName(strtolower($a->getName())) ;
-			$b->setName(strtolower($b->getName())) ;
-
-			if ($a->getName() == $b->getName())
-			{
-					return 0;
-			}
-
-			return ($a->getName() < $b->getName()) ? -1 : 1;
-		});
-	}
-
-	static function sortByVersions($array){
-
-		for( $i= 0 ; $i <sizeof($array)  ; $i++ ){
-			$appsTemp =$array[$i]->getVersions();
-			uksort($appsTemp, function ($a, $b)
-			{
-				return  -1 * version_compare($a, $b); // multiply by -1 to reverse sort order
-			});
-			$array[$i]->setversions($appsTemp) ;
-		}
-	}
-
-
-	// private static function byName($a, $b) // old sortAppsByName
-	// {
-	//  $a['name'] = strtolower($a['name']);
-	//  $b['name'] = strtolower($b['name']);
-
-	//  if ($a['name'] == $b['name']) {
-	//      return 0;
-	//  }
-
-	//  return ($a['name'] < $b['name']) ? -1 : 1;
-	// }
-
-
-	// private static function byVersions($a, $b) // sortVersions
-	// {
-	//  return  -1 * version_compare($a, $b); // multiply by -1 to reverse sort order
-	// }
-
-}
-
 
 class Path // DONE
 {
@@ -231,7 +171,7 @@ class Path // DONE
 class AppList
 {
 	private $extension;
-	// private $apps = array();
+	private $apps = array();
 
 	public function __construct($ext){
 
@@ -271,41 +211,23 @@ class AppList
 
 		foreach ($files as $file) {
 
-			if (preg_match('/\.'.$this->extension.'$/i', $file)) // $extension represente la variable static $extension
+			if (preg_match('/\.'.$this->extension.'$/i', $file))
 			{
 				$appPathList [] = "{$dir}/{$file}";
 			}
 			else if (is_dir("{$dir}/{$file}"))
 			{
 				$appPathList2  = $this->findPaths("{$dir}/{$file}"); // a remplacer
-				// $appPathList2  = findIosAppPaths("{$dir}/{$file}"); // a remplacer
 				$appPathList = array_merge($appPathList, $appPathList2);
 			}
 		}
 		return $appPathList;
 	}
 
-	public function findAllApps($dir) // A FINIR fusion de findAndroidApps et findIosApps
-	{
-		// $path = new Path();
-		$dirResult = Path::join($dir); # remove trailing slash, if any
-		// $dir = joinPath($dir); # remove trailing slash, if any
 
-		$files = scandir($dirResult);
-		$result = array();
-		global $appFolder;
-		global $imgFolder;
-		global $iconFolder;
+	public function createListFromPaths($dir, $listPath){
 
-		// $appPathList = findAndroidAppPaths($dir);
-		$appPathList = $this->findPaths($dir);
-
-		foreach ($appPathList as $appPath){
-
-			// $temp = getApkinfo($appPath, $dir);
-			// $indice = checkAppAlreadyInList($result, $temp);
-
-			// var $app;
+		foreach ($listPath as $appPath){
 
 			if ($this->extension == 'ipa'){
 				$app = new IosApp();
@@ -318,62 +240,75 @@ class AppList
 
 			$app->findInfos($appPath, $dir);
 			$temp = $app;
-			//get_object_vars($temp) ;
 
-			$indice = $this->check($result, $temp);
-			// $indice = checkAppAlreadyInList($result, $temp);
+			$indice = $this->check($this->apps, $temp);
 
 			if ($indice == -1){
-				array_push($result,$temp);
+				array_push($this->apps,$temp);
 
 				} else {
-					$apptemp = $result[$indice];
+					$apptemp = $this->apps[$indice];
 					$versions = array_merge($apptemp->getVersions(), $temp->getVersions());
-					// $result[$indice]['versions'] = $versions;
 					$apptemp->setVersions($versions);
 				}
 		}
 
-		// print_r($result);
+	}
 
-		Sort::sortByName($result);
-		// $result = Sort::sortByName($result);
-		// usort($result, Sort::byName());
-		// $result = Sort::sortByVersions($result);
-		Sort::sortByVersions($result);
+	public function findAllApps($dir) // A FINIR fusion de findAndroidApps et findIosApps
+	{
+		$dirResult = Path::join($dir); # remove trailing slash, if any
+
+		$files = scandir($dirResult);
+		// $result = array();
+
+
+		$appPathList = $this->findPaths($dir);
+
+		$this->createListFromPaths($dir,$appPathList);
+
+
+		AppList::sortByNameAndVersion($this->apps);
 
 			// Trouver l icone dans le fichier
 
-		foreach ($result as $app) {
-			$appName = $app->getName();
-			if ($this->extension == 'ipa'){
-				$iconPath = 'Payload/'.$appName.'.app/icon-72.png';
-			}
-			else if ($this->extension == 'apk'){
-				$iconPath = 'res/drawable/icon.png';
-			}
+		$this->findIconsInLastVersion();
 
-			$za = new \ZipArchive();
-			$za->open($appFolder.$app->getVersions()[array_keys($app->getVersions())[0]]);
-			$za->extractTo(Path::join($imgFolder,'tmp'), $iconPath);
-			$za->close();
-
-			if (!file_exists(Path::join($iconFolder,$appName))) {
-				mkdir(Path::join($iconFolder,$appName), 0755, true);
-			}
-
-			if (file_exists(Path::join($imgFolder,'tmp/',$iconPath))) {
-				copy(Path::join($imgFolder,'tmp/',$iconPath), Path::join($iconFolder,$appName,'/icon.png'));
-			}
-
-			if (file_exists($iconFolder.$appName)) {
-				$this->rrmdir(Path::join($imgFolder,'tmp/res/'));
-			}
-		}
-		// print_r($result);
-		$this->apps = $result;
 	}
 
+	public function findIconsInLastVersion(){
+
+		global $appFolder;
+		global $imgFolder;
+		global $iconFolder;
+
+		foreach ($this->apps as $app) {
+					$appName = $app->getName();
+					if ($this->extension == 'ipa'){
+						$iconPath = 'Payload/'.$appName.'.app/icon-72.png';
+					}
+					else if ($this->extension == 'apk'){
+						$iconPath = 'res/drawable/icon.png';
+					}
+
+					$za = new \ZipArchive();
+					$za->open($appFolder.$app->getVersions()[array_keys($app->getVersions())[0]]);
+					$za->extractTo(Path::join($imgFolder,'tmp'), $iconPath);
+					$za->close();
+
+					if (!file_exists(Path::join($iconFolder,$appName))) {
+						mkdir(Path::join($iconFolder,$appName), 0755, true);
+					}
+
+					if (file_exists(Path::join($imgFolder,'tmp/',$iconPath))) {
+						copy(Path::join($imgFolder,'tmp/',$iconPath), Path::join($iconFolder,$appName,'/icon.png'));
+					}
+
+					if (file_exists($iconFolder.$appName)) {
+						$this->rrmdir(Path::join($imgFolder,'tmp/res/'));
+					}
+				}
+	}
 	public function rrmdir($dir)
 	{
 		if (is_dir($dir)) {
@@ -387,6 +322,42 @@ class AppList
 				rmdir($dir);
 		}
 	}
+
+	static function sortByName($array)
+	{
+		usort($array, function ($a, $b)
+		{
+			$a->setName(strtolower($a->getName())) ;
+			$b->setName(strtolower($b->getName())) ;
+
+			if ($a->getName() == $b->getName())
+			{
+					return 0;
+			}
+
+			return ($a->getName() < $b->getName()) ? -1 : 1;
+		});
+	}
+
+	static function sortByVersions($array){
+
+		for( $i= 0 ; $i <sizeof($array)  ; $i++ ){
+			$appsTemp =$array[$i]->getVersions();
+			uksort($appsTemp, function ($a, $b)
+			{
+				return  -1 * version_compare($a, $b); // multiply by -1 to reverse sort order
+			});
+			$array[$i]->setversions($appsTemp) ;
+		}
+	}
+
+	static function sortByNameAndVersion($array){
+
+		AppList::sortByName($array);
+		AppList::sortByVersions($array);
+
+	}
+
 }
 
 class Web {

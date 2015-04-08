@@ -174,7 +174,7 @@
 
 									<!--icone de l appli-->
 									<div class="wrapper">
-										<img class='appIcon' src="<?= $currentUrlFolder.'display.php?path='.$app->getId() ?>" onerror="hide(this)"></img>
+										<img class='appIcon' src="<?= $currentUrlFolder.'display.php?path='.$app->getName() ?>" onerror="hide(this)"></img>
 									</div>
 
 								<!--nom de l appli-->

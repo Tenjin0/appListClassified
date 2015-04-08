@@ -7,13 +7,13 @@
 	define('PATH_PARM', 'path');
 
 	if (!array_key_exists(PATH_PARM, $_GET) || !$_GET[PATH_PARM])
-		Web::sendNotFound();
+		application\Web::sendNotFound();
 
 	$appName = $_GET[PATH_PARM];
 	$imgFullPath = "{$imageFolder}{$appName}/icon.png";
 
 	if (!file_exists($imgFullPath))
-		Web::sendNotFound();
+		application\Web::sendNotFound();
 
-	Web::setContentType('image/png');
+	application\Web::setContentType('image/png');
 	readfile($imgFullPath);
