@@ -225,7 +225,7 @@ class AppList
 	}
 
 
-	public function createListFromPaths($dir, $listPath){
+	private function fillListFromPaths($dir, $listPath){
 
 		foreach ($listPath as $appPath){
 
@@ -255,7 +255,7 @@ class AppList
 
 	}
 
-	public function findAllApps($dir) // A FINIR fusion de findAndroidApps et findIosApps
+	public function createListApps($dir) // A FINIR fusion de findAndroidApps et findIosApps
 	{
 		$dirResult = Path::join($dir); # remove trailing slash, if any
 
@@ -265,18 +265,18 @@ class AppList
 
 		$appPathList = $this->findPaths($dir);
 
-		$this->createListFromPaths($dir,$appPathList);
+		$this->fillListFromPaths($dir,$appPathList);
 
 
-		AppList::sortByNameAndVersion($this->apps);
+		$this->sortByNameAndVersion($this->apps);
 
 			// Trouver l icone dans le fichier
 
-		$this->findIconsInLastVersion();
+		$this->findIconFromLastVersion();
 
 	}
 
-	public function findIconsInLastVersion(){
+	private function findIconFromLastVersion(){
 
 		global $appFolder;
 		global $imgFolder;
@@ -309,7 +309,7 @@ class AppList
 					}
 				}
 	}
-	public function rrmdir($dir)
+	private function rrmdir($dir)
 	{
 		if (is_dir($dir)) {
 			$objects = scandir($dir);
@@ -323,7 +323,7 @@ class AppList
 		}
 	}
 
-	static function sortByName($array)
+	private function sortByName($array)
 	{
 		usort($array, function ($a, $b)
 		{
@@ -339,7 +339,7 @@ class AppList
 		});
 	}
 
-	static function sortByVersions($array){
+	private function sortByVersions($array){
 
 		for( $i= 0 ; $i <sizeof($array)  ; $i++ ){
 			$appsTemp =$array[$i]->getVersions();
@@ -351,7 +351,7 @@ class AppList
 		}
 	}
 
-	static function sortByNameAndVersion($array){
+	private function sortByNameAndVersion($array){
 
 		AppList::sortByName($array);
 		AppList::sortByVersions($array);
